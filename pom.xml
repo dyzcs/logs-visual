@@ -18,6 +18,7 @@
         <module>logs-common</module>
         <module>logs-logger</module>
         <module>logs-mocker</module>
+        <module>logs-realtime</module>
     </modules>
 
     <properties>

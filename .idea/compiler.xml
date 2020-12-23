@@ -6,6 +6,7 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="logs-realtime" />
         <module name="logs-common" />
         <module name="logs-mocker" />
         <module name="logs-logger" />
@@ -21,6 +22,7 @@
       <module name="logs-common" options="-parameters" />
       <module name="logs-logger" options="-parameters" />
       <module name="logs-mocker" options="-parameters" />
+      <module name="logs-realtime" options="-parameters" />
     </option>
   </component>
 </project>
