@@ -2,6 +2,7 @@ package com.dyzcs.logslogger.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.dyzcs.constants.LogsConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -32,9 +33,9 @@ public class LoggerController {
 
         // 根据数据中的"type"字段选择发送到不同的字段
         if ("startup".equals(jsonObject.getString("type"))) {
-//            kafkaTemplate.send(Lo, jsonObject.toString());
+            kafkaTemplate.send(LogsConstant.LOGS_STARTUP, jsonObject.toString());
         } else {
-//            kafkaTemplate.send(MallConstant.MALL_EVENT, jsonObject.toString());
+            kafkaTemplate.send(LogsConstant.LOGS_EVENT, jsonObject.toString());
         }
 
         return "success";
