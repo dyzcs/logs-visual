@@ -1,16 +1,17 @@
 package com.dyzcs.app
 
-import java.text.SimpleDateFormat
-import java.util.Date
-
 import com.alibaba.fastjson.JSON
 import com.dyzcs.bean.StartupLog
-import com.dyzcs.constants.LogsConstant;
+import com.dyzcs.constants.LogsConstant
 import com.dyzcs.handler.DauHandler
 import com.dyzcs.utils.MyKafkaUtil
 import org.apache.spark.SparkConf
 import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.{Seconds, StreamingContext}
+
+import java.sql.DriverManager
+import java.text.SimpleDateFormat
+import java.util.Date
 
 
 object DauApp {
@@ -66,7 +67,31 @@ object DauApp {
         //                Some("s183,s184:2181"))
         //        })
         // 测试
-        filterByMidGroupLogDStream.print()
+        //        filterByMidGroupLogDStream.print()
+
+        // 8.将数据写入MySQL
+        // select count(*) from logs_dau where logdate=2020-12-24
+        filterByMidGroupLogDStream.foreachRDD(rdd => {
+            rdd.foreachPartition(pars => {
+                val connection = DriverManager.getConnection("jdbc:mysql://139.9.181.57/logsdata?useSSL=false", "root", "chen2908")
+                val statement = connection.prepareStatement("insert into logs_dau values(?,?,?,?,?,?,?,?,?,?,?)")
+                while (pars.hasNext) {
+                    val log = pars.next()
+                    statement.setString(1, log.mid)
+                    statement.setString(2, log.uid)
+                    statement.setString(3, log.appid)
+                    statement.setString(4, log.area)
+                    statement.setString(5, log.os)
+                    statement.setString(6, log.ch)
+                    statement.setString(7, log.`type`)
+                    statement.setString(8, log.vs)
+                    statement.setString(9, log.logDate)
+                    statement.setString(10, log.logHour)
+                    statement.setLong(11, log.ts)
+                    statement.executeUpdate()
+                }
+            })
+        })
 
         // 启动
         ssc.start()
