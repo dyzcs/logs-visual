@@ -5,9 +5,9 @@ import com.dyzcs.bean.EventLog
 import com.dyzcs.constants.LogsConstant
 import com.dyzcs.utils.MyKafkaUtil
 import org.apache.spark.SparkConf
-import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 
+import java.sql.DriverManager
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -46,16 +46,63 @@ object AlertApp {
             eventLog
         })
 
-        // 5.开窗
-        val eventLogWindowDStream = eventLogDStream.window(Seconds(30))
+        val addCommentCount = ssc.sparkContext.longAccumulator("addComment")
+        val couponCount = ssc.sparkContext.longAccumulator("coupon")
+        val addCartCount = ssc.sparkContext.longAccumulator("addCart")
+        val clickItemCount = ssc.sparkContext.longAccumulator("clickItem")
+        val addFavorCount = ssc.sparkContext.longAccumulator("addFavor")
 
-        // 6.转换数据结构并按照mid分组
-        val midToLogIterDStream: DStream[(String, Iterable[EventLog])] =
-            eventLogWindowDStream.map(log => (log.mid, log)).groupByKey()
-        
+        eventLogDStream.foreachRDD(event => {
+            event.foreachPartition(rdd => {
+                val connection = DriverManager.getConnection("jdbc:mysql://139.9.181.57/logsdata?useSSL=false", "root", "chen2908")
+                val statement1 = connection.prepareStatement("replace into logs_act values(?, ?)")
 
-        // 9.启动任务
+                while (rdd.hasNext) {
+                    val eventLog = rdd.next()
+//                    System.out.println(eventLog.evid);
+                    if ("addComment".equals(eventLog.evid)) {
+                        addCommentCount.add(1)
+                        statement1.setString(1, "addComment")
+                        statement1.setLong(2, addCartCount.count)
+                        System.out.println(addCartCount.count);
+                        statement1.executeUpdate()
+                    } else if ("coupon".equals(eventLog.evid)) {
+                        couponCount.add(1)
+                        statement1.setString(1, "coupon")
+                        statement1.setLong(2, couponCount.count)
+                        statement1.executeUpdate()
+                    } else if ("addCart".equals(eventLog.evid)) {
+                        addCartCount.add(1)
+                        statement1.setString(1, "addCart")
+                        statement1.setLong(2, addCartCount.count)
+                        statement1.executeUpdate()
+                    } else if ("clickItem".equals(eventLog.evid)) {
+                        clickItemCount.add(1)
+                        statement1.setString(1, "clickItem")
+                        statement1.setLong(2, clickItemCount.count)
+                        statement1.executeUpdate()
+                    } else if ("addFavor".equals(eventLog.evid)) {
+                        addFavorCount.add(1)
+                        statement1.setString(1, "addFavor")
+                        statement1.setLong(2, addFavorCount.count)
+                        statement1.executeUpdate()
+                    }
+                }
+            })
+        })
+
+        //        // 5.开窗
+        //        val eventLogWindowDStream = eventLogDStream.window(Seconds(30))
+        //
+        //        // 6.转换数据结构并按照mid分组
+        //        val midToLogIterDStream: DStream[(String, Iterable[EventLog])] =
+        //            eventLogWindowDStream.map(log => (log.mid, log)).groupByKey()
+        //
+        ////        midToLogIterDStream.print()
+
+        // 启动任务
         ssc.start()
         ssc.awaitTermination()
     }
+
 }
