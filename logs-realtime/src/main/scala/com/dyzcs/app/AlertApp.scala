@@ -54,7 +54,7 @@ object AlertApp {
 
         eventLogDStream.foreachRDD(event => {
             event.foreachPartition(rdd => {
-                val connection = DriverManager.getConnection("jdbc:mysql://139.9.181.57/logsdata?useSSL=false", "root", "chen2908")
+                val connection = DriverManager.getConnection("jdbc:mysql://ip/logsdata?useSSL=false", "root", "password")
                 val statement1 = connection.prepareStatement("replace into logs_act values(?, ?)")
 
                 while (rdd.hasNext) {
