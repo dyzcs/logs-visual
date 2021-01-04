@@ -74,7 +74,7 @@ object DauApp {
         // select LOGHOUR lh, count(*) ct from logs_dau where LOGDATE='2020-12-24' group by LOGHOUR;
         filterByMidGroupLogDStream.foreachRDD(rdd => {
             rdd.foreachPartition(pars => {
-                val connection = DriverManager.getConnection("jdbc:mysql://139.9.181.57/logsdata?useSSL=false", "root", "chen2908")
+                val connection = DriverManager.getConnection("jdbc:mysql://ip/logsdata?useSSL=false", "root", "")
                 val statement1 = connection.prepareStatement("insert into logs_dau values(?,?,?,?,?,?,?,?,?,?,?)")
                 while (pars.hasNext) {
                     val log = pars.next()
