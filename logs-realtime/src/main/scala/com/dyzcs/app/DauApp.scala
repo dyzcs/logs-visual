@@ -69,9 +69,9 @@ object DauApp {
         // 测试
         //        filterByMidGroupLogDStream.print()
 
-        // 8.将数据写入MySQL
-        // select count(*) from logs_dau where logdate=2020-12-24
-        // select LOGHOUR lh, count(*) ct from logs_dau where LOGDATE='2020-12-24' group by LOGHOUR;
+        // 8.gs_dau where logdate=2020-12-24
+        // select LOGHOUR lh, count(*) ct fro将数据写入MySQL
+        //        // select count(*) from lom logs_dau where LOGDATE='2020-12-24' group by LOGHOUR;
         filterByMidGroupLogDStream.foreachRDD(rdd => {
             rdd.foreachPartition(pars => {
                 val connection = DriverManager.getConnection("jdbc:mysql://ip/logsdata?useSSL=false", "root", "")
